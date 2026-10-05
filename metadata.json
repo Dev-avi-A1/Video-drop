@@ -1,0 +1,6 @@
+{
+  "name": "VideoDrop - Simple Video Downloader",
+  "description": "A fast and simple interface for retrieving video information and authorized download options.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
