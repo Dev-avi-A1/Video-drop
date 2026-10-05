@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download, CheckCircle2, Loader2, X, AlertCircle } from 'lucide-react';
 import { DownloadJob } from '../types/index.js';
-import { ProgressBar } from './ProgressBar.js';
+import { useDialog } from '../hooks/useDialog.js';
 
 interface DownloadProgressModalProps {
   job: DownloadJob | null;
@@ -12,6 +12,7 @@ export const DownloadProgressModal: React.FC<DownloadProgressModalProps> = ({
   job,
   onClose
 }) => {
+  const dialogRef = useDialog(Boolean(job), onClose);
   if (!job) return null;
 
   const isReady = job.status === 'ready';
@@ -25,6 +26,8 @@ export const DownloadProgressModal: React.FC<DownloadProgressModalProps> = ({
       const link = document.createElement('a');
       link.href = job.downloadUrl;
       link.setAttribute('download', job.fileName || `video.${job.container}`);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -33,12 +36,14 @@ export const DownloadProgressModal: React.FC<DownloadProgressModalProps> = ({
 
   return (
     <div 
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="download-modal-title"
     >
-      <div className="relative w-full max-w-lg bg-[#121821] border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-6">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#121821] border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
           <div className="flex items-center gap-2.5">
@@ -86,9 +91,11 @@ export const DownloadProgressModal: React.FC<DownloadProgressModalProps> = ({
         {/* Dynamic Progress or Completion View */}
         {isWorking && (
           <div className="space-y-4">
-            <ProgressBar progress={job.progress} />
+            <div className="flex justify-center" role="status" aria-label="Preparing download">
+              <Loader2 className="w-8 h-8 animate-spin text-rose-400" />
+            </div>
             <p className="text-xs text-center text-slate-400 italic">
-              {job.message || 'Processing stream chunks on backend server...'}
+              {job.message || 'Waiting for the download provider…'}
             </p>
           </div>
         )}
@@ -96,7 +103,7 @@ export const DownloadProgressModal: React.FC<DownloadProgressModalProps> = ({
         {isReady && (
           <div className="space-y-4 text-center">
             <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs sm:text-sm">
-              Media container successfully compiled and authorized for download.
+              Your download link is ready. The provider serves the actual file directly.
             </div>
 
             <button
@@ -109,7 +116,7 @@ export const DownloadProgressModal: React.FC<DownloadProgressModalProps> = ({
             </button>
 
             <p className="text-[11px] text-slate-500">
-              Temporary download package will be automatically removed after 15 minutes.
+              Links may expire. If the link stops working, request a new download. Some browsers open the file in a new tab; use their Save option.
             </p>
           </div>
         )}

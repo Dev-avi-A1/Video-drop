@@ -12,13 +12,13 @@ export const HowItWorks: React.FC = () => {
     {
       index: '02',
       title: 'Analyze',
-      description: 'The server retrieves authorized video metadata, audio streams, and available resolutions.',
+      description: 'View live metadata and choose your preferred video quality or audio bitrate.',
       icon: <Search className="w-5 h-5 text-amber-400" />
     },
     {
       index: '03',
       title: 'Download',
-      description: 'Choose your desired format (MP4 video or MP3/M4A audio) and download the file directly.',
+      description: 'Request an MP4 video or MP3 audio link from the provider, then save the file to your device.',
       icon: <Download className="w-5 h-5 text-emerald-400" />
     }
   ];
@@ -30,10 +30,10 @@ export const HowItWorks: React.FC = () => {
           <span className="text-xs font-semibold tracking-wider uppercase text-rose-400">
             Streamlined Workflow
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">
             How It Works
           </h2>
-          <p className="text-sm sm:text-base text-slate-400">
+          <p className="text-sm sm:text-base text-[var(--text-secondary)]">
             A frictionless three-step process designed for speed, privacy, and simplicity.
           </p>
         </div>

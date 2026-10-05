@@ -4,7 +4,16 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+
+[dev]
+  command = "npm run dev"
+  targetPort = 3000
+  port = 8889
+  framework = "#custom"
 
 # Single Page Application (SPA) redirect rule
 [[redirects]]

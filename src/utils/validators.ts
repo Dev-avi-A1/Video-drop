@@ -43,11 +43,9 @@ export function extractYouTubeVideoId(input: string): string | null {
     const hostname = url.hostname.toLowerCase();
 
     // Verify it belongs to youtube or youtu.be
-    const isSupportedHost = YOUTUBE_HOSTS.some(
-      (h) => hostname === h || hostname.endsWith('.' + h)
-    );
+    const isSupportedHost = YOUTUBE_HOSTS.includes(hostname);
 
-    if (!isSupportedHost) {
+    if (!isSupportedHost || !['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.port) {
       return null;
     }
 
@@ -61,7 +59,7 @@ export function extractYouTubeVideoId(input: string): string | null {
     }
 
     // 2. youtube.com/watch?v=VIDEO_ID
-    const vParam = url.searchParams.get('v');
+    const vParam = url.pathname === '/watch' ? url.searchParams.get('v') : null;
     if (vParam && /^[a-zA-Z0-9_-]{11}$/.test(vParam)) {
       return vParam;
     }
@@ -110,9 +108,7 @@ export function validateYouTubeUrl(input: string): ValidationResult {
     }
     const url = new URL(urlString);
     const hostname = url.hostname.toLowerCase();
-    const isSupported = YOUTUBE_HOSTS.some(
-      (h) => hostname === h || hostname.endsWith('.' + h)
-    );
+    const isSupported = YOUTUBE_HOSTS.includes(hostname);
 
     if (!isSupported && !/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
       return {

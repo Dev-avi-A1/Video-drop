@@ -65,11 +65,7 @@ export interface DownloadJob {
 export interface DownloadStartResponse {
   success: boolean;
   jobId?: string;
-  error?: string;
-}
-
-export interface DownloadStatusResponse {
-  success: boolean;
   job?: DownloadJob;
   error?: string;
+  errorCode?: string;
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, ShieldAlert, CheckCircle2, Server, Scale, Terminal } from 'lucide-react';
+import { useDialog } from '../hooks/useDialog.js';
 
 interface ComplianceModalProps {
   isOpen: boolean;
@@ -7,10 +8,13 @@ interface ComplianceModalProps {
 }
 
 export const ComplianceModal: React.FC<ComplianceModalProps> = ({ isOpen, onClose }) => {
+  const dialogRef = useDialog(isOpen, onClose);
   if (!isOpen) return null;
 
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
@@ -42,8 +46,8 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ isOpen, onClos
               1. Platform Restrictions & DRM Compliance
             </h4>
             <p className="text-slate-400">
-              VideoDrop strictly adheres to digital copyright legislation (including DMCA and EU Copyright Directives) and YouTube's Terms of Service.
-              This application does not bypass DRM, encryption keys, paywalls, or authentication boundaries. Downloading is only initiated where explicitly permitted by content license or authorized public media endpoints.
+              VideoDrop adds no artificial download quotas or format locks. Download only content you have permission to save.
+              This application does not bypass DRM, paywalls, or authentication boundaries. Source access and download availability depend on the connected provider.
             </p>
           </div>
 
@@ -54,8 +58,8 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ isOpen, onClos
               2. Clean Service Abstraction
             </h4>
             <p className="text-slate-400">
-              The application implements a clean service layer (<code className="text-rose-300 font-mono text-xs">videoService.ts</code>) decoupling frontend UI components from backend data sources.
-              In evaluation mode, a Mock Provider provides realistic manifests and progress simulation so that all interface capabilities can be tested safely without exposing private API keys or violating third-party terms.
+              Netlify Functions retrieve live metadata and connect to a configured Cobalt instance for actual download links. Files are delivered directly by that provider.
+              No placeholder files, simulated downloads, or invented video statistics are presented as real results.
             </p>
           </div>
 
@@ -66,7 +70,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ isOpen, onClos
               3. Privacy & Zero-Retention
             </h4>
             <p className="text-slate-400">
-              All URL analyses are performed strictly in volatile memory. We do not persist URLs, IP records, or download histories in any database. Temporary stream containers are purged by automated background workers every 15 minutes.
+              VideoDrop does not save download histories or media files. Links are sent to YouTube for metadata and to the configured downloader for processing. Provider and hosting-platform logging policies apply separately.
             </p>
           </div>
 
@@ -77,7 +81,7 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ isOpen, onClos
               4. Backend Security & Abuse Protection
             </h4>
             <p className="text-slate-400">
-              Our Express server enforces sliding-window IP rate limiting (60 req/min), strict URL structure sanitization, size limits on payloads, and security headers (nosniff, frameguard).
+              The API validates URLs and requested formats, limits request payload size, rejects unsafe download links, and uses request timeouts and security headers. VideoDrop imposes no download-count limit; the provider may enforce its own limits.
             </p>
           </div>
         </div>

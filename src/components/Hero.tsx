@@ -41,7 +41,7 @@ export const Hero: React.FC<HeroProps> = ({
         </div>
 
         {/* Large Centered Headline with text-wrap: balance */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.1] [text-wrap:balance]">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.1] [text-wrap:balance]">
           Download Videos.{' '}
           <span className="bg-gradient-to-r from-rose-500 via-rose-400 to-amber-400 bg-clip-text text-transparent">
             Simply.
@@ -49,8 +49,8 @@ export const Hero: React.FC<HeroProps> = ({
         </h1>
 
         {/* Subtitle */}
-        <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed [text-wrap:balance]">
-          Paste a supported YouTube URL and retrieve available video information and authorized download options in seconds.
+        <p className="max-w-2xl mx-auto text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed [text-wrap:balance]">
+          Paste a YouTube URL, choose your preferred quality, and request a real video or audio download.
         </p>
 
         {/* Main URL Input Box */}

@@ -40,7 +40,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
       case 'VIDEO_UNAVAILABLE':
         return 'Video Unavailable';
       case 'DOWNLOAD_UNAVAILABLE':
-        return 'Authorized Download Unavailable';
+        return 'Download Unavailable';
       case 'RATE_LIMITED':
         return 'Too Many Requests';
       case 'NETWORK_ERROR':
@@ -51,7 +51,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   };
 
   return (
-    <div className="w-full bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 sm:p-5 text-slate-200 shadow-lg">
+    <div role="alert" className="w-full bg-[#121821] border border-rose-500/30 rounded-xl p-4 sm:p-5 text-slate-200 shadow-lg">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           {getIcon()}
@@ -64,7 +64,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
             </p>
             {code === 'DOWNLOAD_UNAVAILABLE' && (
               <p className="text-xs text-slate-400 mt-2">
-                Tip: Videos subject to DRM, copyright restrictions, or private visibility cannot be extracted or processed.
+                Check the provider configuration or try another quality. Source access controls and provider availability still apply.
               </p>
             )}
             {onRetry && (

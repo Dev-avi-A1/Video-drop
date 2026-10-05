@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCompliance }) => {
               </span>
             </div>
             <p className="text-slate-400 text-xs max-w-sm">
-              Simple. Fast. Secure. Direct video metadata analysis and authorized format retriever.
+              Simple. Fast. Secure. Live video metadata and provider-powered downloads.
             </p>
           </div>
 

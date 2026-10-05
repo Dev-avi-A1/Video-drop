@@ -30,7 +30,7 @@ export const FeatureCard: React.FC = () => {
     },
     {
       title: 'Privacy Focused',
-      description: 'Zero permanent logs of analyzed URLs. Temporary files auto-purged after 15 minutes.',
+      description: 'No download history stored by VideoDrop. Media transfers directly from the configured provider.',
       icon: <Lock className="w-5 h-5 text-teal-400" />
     }
   ];
@@ -42,10 +42,10 @@ export const FeatureCard: React.FC = () => {
           <span className="text-xs font-semibold tracking-wider uppercase text-rose-400">
             Engineered For Reliability
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">
             Core Features
           </h2>
-          <p className="text-sm sm:text-base text-slate-400">
+          <p className="text-sm sm:text-base text-[var(--text-secondary)]">
             Built with modern web standards, strict security posture, and legal compliance.
           </p>
         </div>

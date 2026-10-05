@@ -5,10 +5,10 @@ type Theme = 'dark' | 'light';
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('videodrop_theme') as Theme | null;
-      if (saved === 'dark' || saved === 'light') {
-        return saved;
-      }
+      try {
+        const saved = localStorage.getItem('videodrop_theme') as Theme | null;
+        if (saved === 'dark' || saved === 'light') return saved;
+      } catch {}
       return 'dark'; // Default premium dark theme
     }
     return 'dark';
@@ -23,7 +23,9 @@ export function useTheme() {
       root.classList.remove('dark');
       root.classList.add('light');
     }
-    localStorage.setItem('videodrop_theme', theme);
+    try {
+      localStorage.setItem('videodrop_theme', theme);
+    } catch {}
   }, [theme]);
 
   const toggleTheme = () => {

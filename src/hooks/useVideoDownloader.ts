@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { VideoMetadata, VideoFormat, DownloadJob } from '../types/index.js';
+import { useState, useRef, useEffect } from 'react';
+import type { VideoMetadata, VideoFormat, DownloadJob } from '../types/index.js';
 import { validateYouTubeUrl } from '../utils/validators.js';
 import { videoService } from '../services/videoService.js';
 
@@ -8,112 +8,89 @@ export function useVideoDownloader() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
-  
   const [video, setVideo] = useState<VideoMetadata | null>(null);
   const [formats, setFormats] = useState<VideoFormat[]>([]);
-  const [isMock, setIsMock] = useState(false);
   const [providerNotice, setProviderNotice] = useState<string | null>(null);
-
-  // Download state
   const [activeJob, setActiveJob] = useState<DownloadJob | null>(null);
   const [isPreparing, setIsPreparing] = useState(false);
-  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const analysisRequest = useRef<AbortController | null>(null);
+  const downloadRequest = useRef<AbortController | null>(null);
 
-  const stopPolling = useCallback(() => {
-    if (pollTimerRef.current) {
-      clearInterval(pollTimerRef.current);
-      pollTimerRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      stopPolling();
-    };
-  }, [stopPolling]);
+  const handleCancelDownload = () => {
+    downloadRequest.current?.abort();
+    downloadRequest.current = null;
+    setIsPreparing(false);
+    setActiveJob(null);
+  };
 
   const handleAnalyze = async (overrideUrl?: string) => {
-    const targetUrl = (overrideUrl !== undefined ? overrideUrl : url).trim();
-    if (overrideUrl !== undefined) {
-      setUrl(targetUrl);
-    }
-
-    // Reset previous states
+    analysisRequest.current?.abort();
+    analysisRequest.current = null;
+    handleCancelDownload();
+    setIsLoading(false);
     setError(null);
     setErrorCode(null);
-
-    // Client-side validation
+    setVideo(null);
+    setFormats([]);
+    setProviderNotice(null);
+    const targetUrl = (overrideUrl ?? url).trim();
+    setUrl(targetUrl);
     const validation = validateYouTubeUrl(targetUrl);
     if (!validation.isValid) {
       setError(validation.error || 'Please enter a valid YouTube URL.');
       setErrorCode(validation.errorCode || 'INVALID_URL');
       return;
     }
-
+    const controller = new AbortController();
+    analysisRequest.current = controller;
     setIsLoading(true);
-    setActiveJob(null);
-    stopPolling();
-
     try {
-      const response = await videoService.analyze(targetUrl);
-
+      const response = await videoService.analyze(targetUrl, controller.signal);
+      if (analysisRequest.current !== controller) return;
       if (!response.success || !response.video) {
-        setError(response.error || 'Unable to retrieve video information. Please try again.');
+        setError(response.error || 'Unable to retrieve video information.');
         setErrorCode(response.errorCode || 'API_ERROR');
-        setVideo(null);
-        setFormats([]);
         return;
       }
-
       setVideo(response.video);
       setFormats(response.formats || []);
-      setIsMock(response.isMock);
       setProviderNotice(response.providerNotice || null);
-
-      // Synchronize unique shareable URL in browser address bar
-      if (typeof window !== 'undefined') {
-        const urlObj = new URL(window.location.href);
-        urlObj.searchParams.set('v', response.video.id);
-        window.history.replaceState(null, '', urlObj.toString());
-      }
-    } catch {
-      setError('A network error occurred while analyzing the video. Please check your connection.');
+      const address = new URL(window.location.href);
+      address.searchParams.delete('url');
+      address.searchParams.set('v', response.video.id);
+      window.history.replaceState(null, '', address.toString());
+    } catch (caught) {
+      if (analysisRequest.current !== controller) return;
+      setError(caught instanceof Error ? caught.message : 'A network error occurred. Please try again.');
       setErrorCode('NETWORK_ERROR');
     } finally {
-      setIsLoading(false);
+      if (analysisRequest.current === controller) {
+        analysisRequest.current = null;
+        setIsLoading(false);
+      }
     }
   };
 
-  // Initial deep-link check on page load (?v=VIDEO_ID or ?url=...)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const videoParam = params.get('v') || params.get('url');
-      if (videoParam) {
-        const initialUrl = videoParam.startsWith('http')
-          ? videoParam
-          : `https://www.youtube.com/watch?v=${videoParam}`;
-        setUrl(initialUrl);
-        handleAnalyze(initialUrl);
-      }
-    }
+    const params = new URLSearchParams(window.location.search);
+    const initialUrl = params.get('v') || params.get('url');
+    if (initialUrl) void handleAnalyze(initialUrl);
+    return () => {
+      analysisRequest.current?.abort();
+      downloadRequest.current?.abort();
+      analysisRequest.current = null;
+      downloadRequest.current = null;
+    };
   }, []);
 
   const handleStartDownload = async (format: VideoFormat) => {
     if (!video) return;
-
-    if (!format.isDownloadable) {
-      setError(format.restrictionReason || 'This format is currently unavailable for authorized download.');
-      setErrorCode('DOWNLOAD_UNAVAILABLE');
-      return;
-    }
-
+    handleCancelDownload();
     setError(null);
     setErrorCode(null);
+    const controller = new AbortController();
+    downloadRequest.current = controller;
     setIsPreparing(true);
-    stopPolling();
-
-    // Optimistic initial job state
     setActiveJob({
       id: 'pending',
       videoId: video.id,
@@ -123,98 +100,57 @@ export function useVideoDownloader() {
       container: format.container,
       quality: format.quality,
       status: 'preparing',
-      progress: 5,
-      message: 'Contacting authorized stream origin...',
+      progress: 0,
+      message: 'Requesting a real download link from the provider…',
       createdAt: Date.now()
     });
-
     try {
-      const res = await videoService.startDownload({
+      const response = await videoService.startDownload({
         videoId: video.id,
         videoTitle: video.title,
-        formatId: format.id,
-        formatType: format.type,
-        container: format.container,
-        quality: format.quality
-      });
-
-      if (!res.success || !res.jobId) {
-        throw new Error(res.error || 'Failed to start download job');
+        formatId: format.id
+      }, controller.signal);
+      if (downloadRequest.current !== controller) return;
+      if (!response.success || !response.job?.downloadUrl) {
+        setActiveJob(null);
+        setError(response.error || 'The provider did not return a download link.');
+        setErrorCode(response.errorCode || 'DOWNLOAD_ERROR');
+        return;
       }
-
-      const jobId = res.jobId;
-
-      // Start polling backend/client status
-      pollTimerRef.current = setInterval(async () => {
-        const statusRes = await videoService.getStatus(jobId);
-        if (statusRes.success && statusRes.job) {
-          const currentJob = statusRes.job;
-          setActiveJob(currentJob);
-
-          if (currentJob.status === 'ready' || currentJob.status === 'failed') {
-            stopPolling();
-            setIsPreparing(false);
-          }
-        } else {
-          stopPolling();
-          setIsPreparing(false);
-          setError('Failed to track download preparation. Please try again.');
-          setErrorCode('DOWNLOAD_ERROR');
-        }
-      }, 450);
-    } catch (err: any) {
-      stopPolling();
-      setIsPreparing(false);
+      setActiveJob(response.job);
+    } catch (caught) {
+      if (downloadRequest.current !== controller) return;
       setActiveJob(null);
-      setError(err.message || 'Could not initiate download. Please try again.');
+      setError(caught instanceof Error ? caught.message : 'Could not initiate download. Please try again.');
       setErrorCode('DOWNLOAD_ERROR');
+    } finally {
+      if (downloadRequest.current === controller) {
+        downloadRequest.current = null;
+        setIsPreparing(false);
+      }
     }
-  };
-
-  const handleCancelDownload = () => {
-    stopPolling();
-    setIsPreparing(false);
-    setActiveJob(null);
   };
 
   const handleReset = () => {
-    stopPolling();
+    analysisRequest.current?.abort();
+    analysisRequest.current = null;
+    handleCancelDownload();
+    setIsLoading(false);
     setUrl('');
     setVideo(null);
     setFormats([]);
+    setProviderNotice(null);
     setError(null);
     setErrorCode(null);
-    setActiveJob(null);
-    setIsPreparing(false);
-
-    // Clean URL query parameters
-    if (typeof window !== 'undefined') {
-      const urlObj = new URL(window.location.href);
-      urlObj.searchParams.delete('v');
-      urlObj.searchParams.delete('url');
-      window.history.replaceState(null, '', urlObj.pathname + (urlObj.hash || ''));
-    }
+    const address = new URL(window.location.href);
+    address.searchParams.delete('v');
+    address.searchParams.delete('url');
+    window.history.replaceState(null, '', address.toString());
   };
 
   return {
-    url,
-    setUrl,
-    isLoading,
-    error,
-    errorCode,
-    video,
-    formats,
-    isMock,
-    providerNotice,
-    activeJob,
-    isPreparing,
-    handleAnalyze,
-    handleStartDownload,
-    handleCancelDownload,
-    handleReset,
-    clearError: () => {
-      setError(null);
-      setErrorCode(null);
-    }
+    url, setUrl, isLoading, error, errorCode, video, formats, isMock: false, providerNotice,
+    activeJob, isPreparing, handleAnalyze, handleStartDownload, handleCancelDownload, handleReset,
+    clearError: () => { setError(null); setErrorCode(null); }
   };
 }

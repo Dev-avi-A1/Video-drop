@@ -121,13 +121,13 @@ export default function App() {
                 <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                   <div className="space-y-1">
                     <span className="text-xs uppercase font-mono tracking-wider text-rose-400 font-semibold">
-                      Authorized Downloader
+                      Video & Audio Downloader
                     </span>
                     <h3 className="text-xl sm:text-2xl font-bold text-white">
                       Instant Video Extraction & Multi-Bitrate Output
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-300 max-w-lg">
-                      Paste any public YouTube URL above to view authorized video formats, audio streams, and download options.
+                      Paste a YouTube URL above to choose video quality or audio bitrate and request a download from the connected provider.
                     </p>
                   </div>
 

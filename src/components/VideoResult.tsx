@@ -54,13 +54,11 @@ export const VideoResult: React.FC<VideoResultProps> = ({
 
   return (
     <div className="w-full bg-[#121821] border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl space-y-6">
-      {/* Top Banner if mock provider is active */}
-      {isMock && (
+      {providerNotice && (
         <div className="flex items-start gap-2.5 px-4 py-2.5 bg-amber-500/10 border border-amber-500/25 rounded-xl text-amber-300 text-xs leading-relaxed">
           <Info className="w-4 h-4 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <span className="font-semibold">Development Mock Provider: </span>
-            {providerNotice || 'Simulated media format manifests for development testing without live API keys.'}
+            {providerNotice}
           </div>
         </div>
       )}

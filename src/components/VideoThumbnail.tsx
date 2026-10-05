@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Film, Play } from 'lucide-react';
 import { formatDuration } from '../utils/formatters.js';
 
@@ -15,6 +15,11 @@ export const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+    setIsLoaded(false);
+  }, [thumbnail]);
 
   return (
     <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-900 border border-slate-800 shadow-md group">

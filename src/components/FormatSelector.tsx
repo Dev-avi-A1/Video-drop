@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Video, Music, Download, Lock, Check } from 'lucide-react';
+import { Video, Music, Download } from 'lucide-react';
 import { VideoFormat, FormatType } from '../types/index.js';
 
 interface FormatSelectorProps {
@@ -49,13 +49,13 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
             }`}
           >
             <Music className="w-3.5 h-3.5" />
-            <span>Audio (MP3 / M4A)</span>
+            <span>Audio (MP3)</span>
             <span className="text-[10px] opacity-75 font-mono">({audioFormats.length})</span>
           </button>
         </div>
 
         <span className="hidden sm:inline text-xs text-slate-400">
-          Authorized direct output formats
+          Requested output quality
         </span>
       </div>
 
@@ -64,11 +64,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
         {displayedFormats.map((format) => (
           <div
             key={format.id}
-            className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all duration-150 ${
-              format.isDownloadable
-                ? 'bg-[#161D27] hover:bg-[#1a2330] border-slate-800/80 hover:border-slate-700'
-                : 'bg-slate-900/40 border-slate-800/40 opacity-60'
-            }`}
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all duration-150 bg-[#161D27] hover:bg-[#1a2330] border-slate-800/80 hover:border-slate-700"
           >
             {/* Format specs */}
             <div className="flex items-center gap-3.5 mb-2 sm:mb-0">
@@ -96,14 +92,13 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
                 <div className="flex items-center gap-2 text-xs text-slate-400 font-mono tabular-nums">
                   {format.resolution && <span>{format.resolution}</span>}
                   {format.resolution && <span aria-hidden="true">·</span>}
-                  <span>Est. {format.estimatedSize}</span>
+                  <span>{format.estimatedSize}</span>
                 </div>
               </div>
             </div>
 
             {/* Action button */}
             <div className="flex items-center justify-end gap-2 shrink-0">
-              {format.isDownloadable ? (
                 <button
                   type="button"
                   onClick={() => onSelectFormat(format)}
@@ -113,12 +108,6 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
                   <Download className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
                   <span>Download</span>
                 </button>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-slate-500 bg-slate-800/40 rounded-lg border border-slate-800 cursor-not-allowed">
-                  <Lock className="w-3 h-3" />
-                  <span>Restricted</span>
-                </span>
-              )}
             </div>
           </div>
         ))}

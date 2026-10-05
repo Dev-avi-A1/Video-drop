@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Share2, Send, ExternalLink } from 'lucide-react';
 import { VideoMetadata } from '../types/index.js';
+import { useDialog } from '../hooks/useDialog.js';
 
 interface ShareModalProps {
   video: VideoMetadata;
@@ -10,6 +11,7 @@ interface ShareModalProps {
 
 export const ShareModal: React.FC<ShareModalProps> = ({ video, isOpen, onClose }) => {
   const [copied, setCopied] = useState(false);
+  const dialogRef = useDialog(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -85,6 +87,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ video, isOpen, onClose }
 
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
