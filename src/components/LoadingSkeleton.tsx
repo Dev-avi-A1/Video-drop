@@ -3,13 +3,13 @@ import { Loader2, Film, Layers, CheckCircle2 } from 'lucide-react';
 
 export const LoadingSkeleton: React.FC = () => {
   return (
-    <div className="w-full bg-[#121821] border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl animate-pulse space-y-6">
+    <div role="status" aria-label="Loading video metadata" className="w-full bg-[#121821] border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl animate-pulse space-y-6">
       {/* Status indicator checklist during analysis */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
           <Loader2 className="w-5 h-5 text-rose-500 animate-spin" />
           <span className="text-sm font-semibold text-slate-200">
-            Analyzing video stream & formats...
+            Loading video metadata…
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
@@ -23,7 +23,7 @@ export const LoadingSkeleton: React.FC = () => {
           </span>
           <span className="flex items-center gap-1.5 text-slate-400">
             <Layers className="w-3.5 h-3.5 text-slate-600" />
-            <span>Checking formats...</span>
+            <span>Preparing quality choices…</span>
           </span>
         </div>
       </div>
